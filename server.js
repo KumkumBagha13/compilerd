@@ -1,5 +1,6 @@
 require('./envloader')()
 
+
 const express = require('express')
 const app = express()
 const cors = require('cors')
@@ -9,8 +10,10 @@ const baseRouter = require('./router.js')
 const morgan = require('morgan')
 const PORT = process.env.PORT || 3000
 const { respond, l } = require('./loader.js').helpers
+const path = require('path')
 
 require('./loader.js').loadDependency(app)
+
 
 /* Middlewares */
 app.use(express.json())
@@ -42,11 +45,41 @@ app.use(compression())
 app.use(helmet())
 app.use(cors())
 
+// Serve static files from the CodeJudgeUI directory
+app.use(express.static(path.join(__dirname, 'CodeJudgeUI')))
+
 app.use('/api/', baseRouter)
 
-app.get('/', (req, res) => {
-    return res.send('Compiler is up and working')
+// API health check route
+app.get('/api/', (req, res) => {
+    return res.send('Compiler API is up and working')
 })
+
+
+app.post('/api/execute', (req, res) => {
+    // Your code execution logic here
+    // For now, let's just echo back the received data
+    res.json({
+        output: `Received: ${req.body.language} code: ${req.body.script}`,
+        execute_time: null,
+        status_code: 200,
+        memory: null,
+        cpu_time: null,
+        output_files: [],
+        compile_message: "",
+        error: 0
+    });
+});
+// Serve the frontend for any route not starting with /api/
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+        next()
+    } else {
+        res.sendFile(path.join(__dirname, 'CodeJudgeUI', 'index.html'))
+    }
+})
+
+
 
 app.listen(PORT, () => {
     l.info(`Server started at port: ${PORT}`)

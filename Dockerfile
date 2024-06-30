@@ -18,10 +18,21 @@ RUN ln -sf python3 /usr/bin/python
 ADD . /usr/bin/
 ADD start.sh /usr/bin/
 
-RUN npm --prefix /usr/bin/ install
+RUN npm --prefix /usr/bin/ install --legacy-peer-deps
+
 EXPOSE 8080
 
 # add a dummy user that will run the server, hence sandboxing the rest of the container
 RUN addgroup -S -g 2000 runner && adduser -S -D -u 2000 -s /sbin/nologin -h /tmp -G runner runner
 #   USER runner
 CMD sh /usr/bin/start.sh
+
+# Install Ruby
+RUN apt-get install -y ruby-full
+
+# Install Go
+RUN apt-get install -y golang-go
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
