@@ -70,7 +70,7 @@ app.post('/api/execute', (req, res) => {
         error: 0
     });
 });
-// Serve the frontend for any route not starting with /api/
+// Serve the CodeJudgeUI for any route not starting with /api/
 app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/')) {
         next()
